@@ -8,7 +8,8 @@ var connection = mysql.createConnection({
 	host: "localhost",
 	user: "root@",
 	password: "",
-	database: "rewardme"
+	database: "rewardme",
+	multipleStatements: true
 });
 
 router.get("/reset", verifyToken, function(req, res) {
@@ -42,7 +43,8 @@ router.get("/reveal", verifyToken, function(req, res) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				`Insert into revealed_slots (slot_id, user_id) values ("${req.body.slot_id}",(Select user_id from users where email="${authData.user.email}"))`,
+				`Insert into revealed_slots (slot_id, user_id) values ("${req.body.slot_id}",(Select user_id from users where email="${authData.user.email}"));
+                 Select * from slots where slot_id = "${req.body.slot_id}"`,
 				(err, results, fields) => {
 					if (err) {
 						res.send({

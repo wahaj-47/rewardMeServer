@@ -11,17 +11,30 @@ var connection = mysql.createConnection({
 	database: "rewardme"
 });
 
-// router.post("/", verifyToken, function(req, res){
-// 	jwt.verify(req.token, "secretkey", (err, authData) => {
-// 		if (err) {
-// 			res.send({ error: err });
-// 		} else {
-// 			var log = {
-
-// 			};
-// 			connection.query(`Insert into logs`)
-// 		}
-// })
+router.post("/", verifyToken, function(req, res) {
+	jwt.verify(req.token, "secretkey", (err, authData) => {
+		if (err) {
+			res.send({ error: err });
+		} else {
+			connection.query(
+				`Insert into logs (value, user_id) values ((Select slot_value from slots where slot_id="${req.body.slot_id}"), (Select user_id from users where email="${authData.user.email}"))`,
+				(err, results, fields) => {
+					if (err) {
+						res.send({
+							error: err.code,
+							msg: err.sqlMessage,
+							sql: err.sql
+						});
+					} else {
+						res.send({
+							results
+						});
+					}
+				}
+			);
+		}
+	});
+});
 
 router.get("/", verifyToken, function(req, res, next) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
