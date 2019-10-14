@@ -37,7 +37,7 @@ router.get("/reset", verifyToken, function(req, res) {
 	});
 });
 
-router.get("/reveal", verifyToken, function(req, res) {
+router.post("/reveal", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
 		if (err) {
 			res.send({ error: err });
@@ -63,7 +63,7 @@ router.get("/reveal", verifyToken, function(req, res) {
 	});
 });
 
-router.get("/revealed", verifyToken, function(req, res, next) {
+router.post("/revealed", verifyToken, function(req, res, next) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
 		if (err) {
 			res.send({ error: err });
