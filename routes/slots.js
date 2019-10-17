@@ -12,6 +12,49 @@ var connection = mysql.createConnection({
 	multipleStatements: true
 });
 
+router.get("/", verifyToken, function(req, res) {
+	jwt.verify(req.token, "secretkey", (err, authData) => {
+		if (err) {
+			res.send({ error: err });
+		} else {
+			connection.query("Select * from slots", (err, results, fields) => {
+				if (err) {
+					res.send({
+						error: err.code,
+						msg: err.sqlMessage,
+						sql: err.sql
+					});
+				} else {
+					res.send({ results });
+				}
+			});
+		}
+	});
+});
+
+router.post("/editSlot", verifyToken, function(req, res) {
+	jwt.verify(req.token, "secretkey", (err, authData) => {
+		if (err) {
+			res.send({ error: err });
+		} else {
+			connection.query(
+				`UPDATE slots SET slot_value = "${req.body.slot_value}" WHERE slots.slot_id = "${req.body.slot_id}"`,
+				(err, results, fields) => {
+					if (err) {
+						res.send({
+							error: err.code,
+							msg: err.sqlMessage,
+							sql: err.sql
+						});
+					} else {
+						res.send({ results });
+					}
+				}
+			);
+		}
+	});
+});
+
 router.get("/reset", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
 		if (err) {
