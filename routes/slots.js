@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
 	multipleStatements: true
 });
 
-router.get("/", verifyToken, function(req, res) {
+router.post("/", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
 		if (err) {
 			res.send({ error: err });

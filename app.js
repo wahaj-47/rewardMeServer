@@ -9,6 +9,7 @@ var logsRouter = require("./routes/logs");
 var signUpRouter = require("./routes/signUp");
 var loginRouter = require("./routes/login");
 var slotsRouter = require("./routes/slots");
+var adminRouter = require("./routes/admin");
 
 var app = express();
 
@@ -24,5 +25,6 @@ app.use("/logs", logsRouter);
 app.use("/signUp", signUpRouter);
 app.use("/login", loginRouter);
 app.use("/slots", slotsRouter);
+app.use("/admin", adminRouter);
 
 module.exports = app;
