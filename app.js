@@ -10,6 +10,9 @@ var signUpRouter = require("./routes/signUp");
 var loginRouter = require("./routes/login");
 var slotsRouter = require("./routes/slots");
 var adminRouter = require("./routes/admin");
+var forgotPasswordRouter = require("./routes/forgotPassword");
+var deviceTokenRouter = require("./routes/deviceToken");
+var noticeRouter = require("./routes/notice");
 
 var app = express();
 
@@ -26,5 +29,8 @@ app.use("/signUp", signUpRouter);
 app.use("/login", loginRouter);
 app.use("/slots", slotsRouter);
 app.use("/admin", adminRouter);
+app.use("/forgotPassword", forgotPasswordRouter);
+app.use("/deviceToken", deviceTokenRouter);
+app.use("/notice", noticeRouter);
 
 module.exports = app;

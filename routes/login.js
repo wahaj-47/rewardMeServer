@@ -30,12 +30,14 @@ router.post("/", function(req, res, next) {
 			} else if (results.length > 0) {
 				jwt.sign({ user }, "secretkey", (err, token) => {
 					res.send({
+						loggedIn: true,
 						token,
 						msg: "User Logged in Successfully"
 					});
 				});
 			} else {
 				res.send({
+					loggedIn: false,
 					msg: "Incorrect email or password"
 				});
 			}

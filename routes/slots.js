@@ -86,7 +86,7 @@ router.post("/reveal", verifyToken, function(req, res) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				`Insert into revealed_slots (slot_id, user_id) values ("${req.body.slot_id}",(Select user_id from users where email="${authData.user.email}"));
+				`Insert into revealed_slots (slot_id, slot_value, user_id) values ("${req.body.slot_id}", (Select slot_value from slots where slot_id="${req.body.slot_id}"), (Select user_id from users where email="${authData.user.email}"));
                  Select * from slots where slot_id = "${req.body.slot_id}"`,
 				(err, results, fields) => {
 					if (err) {
@@ -112,7 +112,7 @@ router.post("/revealed", verifyToken, function(req, res, next) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				`Select * from revealed_slots where user_id=(Select user_id from users where email="${authData.user.email}")`,
+				`SELECT revealed_slots.slot_id, revealed_slots.slot_value, revealed_slots.user_id FROM slots, revealed_slots WHERE revealed_slots.user_id = (Select user_id from users where email="${authData.user.email}") && slots.slot_id=revealed_slots.slot_id`,
 				function(err, results, fields) {
 					if (err) {
 						res.send({
