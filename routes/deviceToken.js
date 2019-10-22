@@ -11,6 +11,29 @@ var connection = mysql.createConnection({
 	database: "rewardme"
 });
 
+router.get("/all", verifyToken, function(req, res) {
+	jwt.verify(req.token, "secretkey", (err, authData) => {
+		if (err) {
+			res.send({ error: err });
+		} else {
+			connection.query(
+				"Select device_tokens.device_token, users.name, users.email from device_tokens, users where device_tokens.user_id=users.user_id",
+				(err, results, fields) => {
+					if (err) {
+						res.send({
+							error: err.code,
+							msg: err.sqlMessage,
+							sql: err.sql
+						});
+					} else {
+						res.send(results);
+					}
+				}
+			);
+		}
+	});
+});
+
 router.post("/insert", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
 		if (err) {

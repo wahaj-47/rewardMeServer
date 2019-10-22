@@ -1,9 +1,6 @@
 var express = require("express");
+var email = require("emailjs");
 var router = express.Router();
-
-var md5 = require("md5");
-var nodemailer = require("nodemailer");
-const SMTPConnection = require("nodemailer/lib/smtp-connection");
 
 var mysql = require("mysql");
 
@@ -30,34 +27,39 @@ router.post("/", function(req, res, next) {
 				sql: err.sql
 			});
 		} else if (results.length > 0) {
-			sendEmail(user.email);
+			// sendEmail(user.email);
+			var server = email.server.connect({
+				user: "michale.kshlerin70@ethereal.email",
+				password: "YEA5Bzgp6ffDvdvV1D",
+				host: "smtp.ethereal.email",
+				tls: { ciphers: "SSLv3" }
+			});
+
+			var message = {
+				text: "i hope this works",
+				from: "you <wahajhssn@gmail.com>",
+				to: "someone <wahajhssn@gmail.com>",
+				subject: "testing emailjs",
+				attachment: [
+					{ data: "<html>i <i>hope</i> this works!</html>", alternative: true }
+				]
+			};
+
+			// send the message and get a callback with an error or details of the message that was sent
+			server.send(message, function(err, message) {
+				console.log(err || message);
+			});
+			res.send({
+				loggedIn: false,
+				msg: "Email sent"
+			});
 		} else {
 			res.send({
 				loggedIn: false,
-				msg: "Incorrect email or password"
+				msg: "Email not registered"
 			});
 		}
 	});
 });
-
-async function sendEmail(email) {
-	// create reusable transporter object using the default SMTP transport
-	let transporter = nodemailer.createTransport({
-		host: "smtp.ethereal.email",
-		port: 587,
-		auth: {
-			user: "michale.kshlerin70@ethereal.email", // generated ethereal user
-			pass: "YEA5Bzgp6ffDvdvV1D" // generated ethereal password
-		}
-	});
-
-	transporter.verify(function(error, success) {
-		if (error) {
-			console.log(error);
-		} else {
-			console.log("Server is ready to take our messages");
-		}
-	});
-}
 
 module.exports = router;
