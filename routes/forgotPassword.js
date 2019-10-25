@@ -1,15 +1,13 @@
 var express = require("express");
-var email = require("emailjs");
 var router = express.Router();
-
+var md5 = require("md5");
 var mysql = require("mysql");
 
-var connection = mysql.createConnection({
-	host: "localhost",
-	user: "root@",
-	password: "",
-	database: "rewardme"
-});
+var email = require("emailjs");
+var randomstring = require("randomstring");
+
+var connectionObject = require("./connection");
+var connection = mysql.createConnection(connectionObject.development);
 
 router.post("/", function(req, res, next) {
 	var user = {
@@ -27,22 +25,27 @@ router.post("/", function(req, res, next) {
 				sql: err.sql
 			});
 		} else if (results.length > 0) {
+			var verificationCode = randomstring.generate({
+				length: 6,
+				capitalization: "uppercase"
+			});
+			connection.query(
+				`Update users set verificationCode="${verificationCode}" where email="${user.email}"`
+			);
 			// sendEmail(user.email);
 			var server = email.server.connect({
-				user: "michale.kshlerin70@ethereal.email",
-				password: "YEA5Bzgp6ffDvdvV1D",
-				host: "smtp.ethereal.email",
-				tls: { ciphers: "SSLv3" }
+				user: "no-reply@mercedeshairdressing.com",
+				password: "mercedeshairdressing",
+				host: "server269.web-hosting.com",
+				port: 587,
+				tls: true
 			});
 
 			var message = {
-				text: "i hope this works",
-				from: "you <wahajhssn@gmail.com>",
-				to: "someone <wahajhssn@gmail.com>",
-				subject: "testing emailjs",
-				attachment: [
-					{ data: "<html>i <i>hope</i> this works!</html>", alternative: true }
-				]
+				text: "Your password reset code is: " + verificationCode,
+				from: "Mercedes Hairdressing <no-reply@mercedeshairdressing.com>",
+				to: user.email,
+				subject: "Reset Password"
 			};
 
 			// send the message and get a callback with an error or details of the message that was sent
@@ -50,16 +53,48 @@ router.post("/", function(req, res, next) {
 				console.log(err || message);
 			});
 			res.send({
-				loggedIn: false,
+				emailSent: true,
 				msg: "Email sent"
 			});
 		} else {
 			res.send({
-				loggedIn: false,
+				emailSent: false,
 				msg: "Email not registered"
 			});
 		}
 	});
+});
+
+router.post("/updatePassword", function(req, res) {
+	var user = {
+		email: req.body.email,
+		password: md5(req.body.password),
+		verificationCode: req.body.verificationCode
+	};
+	connection.query(
+		`Select * from users where email="${user.email}" && verificationCode="${user.verificationCode}"`,
+		function(err, results, fields) {
+			if (err) {
+				res.send({
+					error: err.code,
+					msg: err.sqlMessage
+				});
+			} else {
+				if (results.length > 0) {
+					connection.query(
+						`Update users set hash="${user.password}" where email="${user.email}" && verificationCode="${user.verificationCode}"`
+					);
+					res.send({
+						passwordUpdated: true
+					});
+				} else {
+					res.send({
+						passwordUpdated: false
+					});
+				}
+			}
+		}
+	);
 });
 
 module.exports = router;

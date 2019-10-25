@@ -28,14 +28,25 @@ router.post("/", function(req, res, next) {
 					sql: err.sql
 				});
 			} else if (results.length > 0) {
-				jwt.sign({ user }, "secretkey", (err, token) => {
-					res.send({
-						loggedIn: true,
-						token,
-						msg: "User Logged in Successfully"
+				if (results[0].verified) {
+					console.log("verified user found");
+					jwt.sign({ user }, "secretkey", (err, token) => {
+						res.send({
+							isVerified: true,
+							loggedIn: true,
+							token,
+							msg: "User Logged in Successfully"
+						});
 					});
-				});
+				} else {
+					console.log("unverified user found");
+					res.send({
+						loggedIn: false,
+						isVerified: false
+					});
+				}
 			} else {
+				console.log("incorrect email or password");
 				res.send({
 					loggedIn: false,
 					msg: "Incorrect email or password"
