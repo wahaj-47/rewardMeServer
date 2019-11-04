@@ -4,12 +4,8 @@ var router = express.Router();
 var mysql = require("mysql");
 var jwt = require("jsonwebtoken");
 
-var connection = mysql.createConnection({
-	host: "localhost",
-	user: "root@",
-	password: "",
-	database: "rewardme"
-});
+var connectionObject = require("./connection");
+var connection = mysql.createConnection(connectionObject.development);
 
 router.get("/all", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
@@ -17,7 +13,7 @@ router.get("/all", verifyToken, function(req, res) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				"Select device_tokens.device_token, users.name, users.email from device_tokens, users where device_tokens.user_id=users.user_id",
+				"Select device_tokens.device_token, users.name, users.email, users.user_id from device_tokens, users where device_tokens.user_id=users.user_id",
 				(err, results, fields) => {
 					if (err) {
 						res.send({
@@ -26,7 +22,7 @@ router.get("/all", verifyToken, function(req, res) {
 							sql: err.sql
 						});
 					} else {
-						res.send(results);
+						res.send({ results });
 					}
 				}
 			);

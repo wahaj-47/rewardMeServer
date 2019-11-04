@@ -4,11 +4,9 @@ var router = express.Router();
 var mysql = require("mysql");
 var jwt = require("jsonwebtoken");
 
+var connectionObject = require("./connection");
 var connection = mysql.createConnection({
-	host: "localhost",
-	user: "root@",
-	password: "",
-	database: "rewardme",
+	...connectionObject.development,
 	multipleStatements: true
 });
 
@@ -47,7 +45,7 @@ router.post("/editSlot", verifyToken, function(req, res) {
 							sql: err.sql
 						});
 					} else {
-						res.send({ results });
+						res.send({ results, slotEdited: true });
 					}
 				}
 			);
@@ -112,7 +110,7 @@ router.post("/revealed", verifyToken, function(req, res, next) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				`SELECT revealed_slots.slot_id, revealed_slots.slot_value, revealed_slots.user_id FROM slots, revealed_slots WHERE revealed_slots.user_id = (Select user_id from users where email="${authData.user.email}") && slots.slot_id=revealed_slots.slot_id`,
+				`SELECT revealed_slots.timestamp, revealed_slots.slot_id, revealed_slots.slot_value, revealed_slots.user_id FROM slots, revealed_slots WHERE revealed_slots.user_id = (Select user_id from users where email="${authData.user.email}") && slots.slot_id=revealed_slots.slot_id`,
 				function(err, results, fields) {
 					if (err) {
 						res.send({
@@ -121,8 +119,40 @@ router.post("/revealed", verifyToken, function(req, res, next) {
 							sql: err.sql
 						});
 					} else {
+						let date = new Date();
+						date =
+							date.getUTCFullYear() +
+							"-" +
+							pad(date.getUTCMonth() + 1) +
+							"-" +
+							pad(date.getUTCDate()) +
+							" " +
+							pad(date.getUTCHours()) +
+							":" +
+							pad(date.getUTCMinutes()) +
+							":" +
+							pad(date.getUTCSeconds());
+						date = date.split(" ").shift();
+						let sqlDate = "";
+						if (results.length > 0) {
+							sqlDate = new Date(results[results.length - 1].timestamp);
+							sqlDate =
+								sqlDate.getUTCFullYear() +
+								"-" +
+								pad(sqlDate.getUTCMonth() + 1) +
+								"-" +
+								pad(sqlDate.getUTCDate()) +
+								" " +
+								pad(sqlDate.getUTCHours()) +
+								":" +
+								pad(sqlDate.getUTCMinutes()) +
+								":" +
+								pad(sqlDate.getUTCSeconds());
+							sqlDate = sqlDate.split(" ").shift();
+						}
+						console.log(date, sqlDate);
 						res.send({
-							authData,
+							allowScan: date === sqlDate ? false : true,
 							slots: results
 						});
 					}
@@ -131,6 +161,10 @@ router.post("/revealed", verifyToken, function(req, res, next) {
 		}
 	});
 });
+
+var pad = function(num) {
+	return ("00" + num).slice(-2);
+};
 
 function verifyToken(req, res, next) {
 	const bearerHeader = req.headers["authorization"];

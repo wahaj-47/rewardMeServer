@@ -1,6 +1,6 @@
 var development = {
 	host: "localhost",
-	user: "root@",
+	user: "root",
 	password: "",
 	database: "rewardme"
 };

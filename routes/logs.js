@@ -4,12 +4,8 @@ var router = express.Router();
 var mysql = require("mysql");
 var jwt = require("jsonwebtoken");
 
-var connection = mysql.createConnection({
-	host: "localhost",
-	user: "root@",
-	password: "",
-	database: "rewardme"
-});
+var connectionObject = require("./connection");
+var connection = mysql.createConnection(connectionObject.development);
 
 router.post("/", verifyToken, function(req, res) {
 	jwt.verify(req.token, "secretkey", (err, authData) => {
@@ -42,7 +38,7 @@ router.get("/", verifyToken, function(req, res, next) {
 			res.send({ error: err });
 		} else {
 			connection.query(
-				`Select * from logs where user_id=(Select user_id from users where email="${authData.user.email}")`,
+				`Select * from logs where user_id=(Select user_id from users where email="${authData.user.email}") ORDER BY timestamp DESC`,
 				function(err, results, fields) {
 					if (err) {
 						res.send({
@@ -54,6 +50,31 @@ router.get("/", verifyToken, function(req, res, next) {
 						res.send({
 							authData,
 							logs: results
+						});
+					}
+				}
+			);
+		}
+	});
+});
+
+router.get("/clear", verifyToken, function(req, res, next) {
+	jwt.verify(req.token, "secretkey", (err, authData) => {
+		if (err) {
+			res.send({ error: err });
+		} else {
+			connection.query(
+				`Delete from logs where user_id=(Select user_id from users where email="${authData.user.email}")`,
+				function(err, results, fields) {
+					if (err) {
+						res.send({
+							error: err.code,
+							msg: err.sqlMessage,
+							sql: err.sql
+						});
+					} else {
+						res.send({
+							logsCleared: true
 						});
 					}
 				}

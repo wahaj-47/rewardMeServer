@@ -23,14 +23,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/logs", logsRouter);
-app.use("/signUp", signUpRouter);
-app.use("/login", loginRouter);
-app.use("/slots", slotsRouter);
-app.use("/admin", adminRouter);
-app.use("/forgotPassword", forgotPasswordRouter);
-app.use("/deviceToken", deviceTokenRouter);
-app.use("/notice", noticeRouter);
+app.use("/rewardMe/users", usersRouter);
+app.use("/rewardMe/logs", logsRouter);
+app.use("/rewardMe/signUp", signUpRouter);
+app.use("/rewardMe/login", loginRouter);
+app.use("/rewardMe/slots", slotsRouter);
+app.use("/rewardMe/admin", adminRouter);
+app.use("/rewardMe/forgotPassword", forgotPasswordRouter);
+app.use("/rewardMe/deviceToken", deviceTokenRouter);
+app.use("/rewardMe/notice", noticeRouter);
 
 module.exports = app;

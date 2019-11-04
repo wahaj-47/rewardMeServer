@@ -6,12 +6,8 @@ var jwt = require("jsonwebtoken");
 
 var mysql = require("mysql");
 
-var connection = mysql.createConnection({
-	host: "localhost",
-	user: "root@",
-	password: "",
-	database: "rewardme"
-});
+var connectionObject = require("./connection");
+var connection = mysql.createConnection(connectionObject.development);
 
 router.post("/", function(req, res, next) {
 	var user = {
@@ -32,6 +28,7 @@ router.post("/", function(req, res, next) {
 					console.log("verified user found");
 					jwt.sign({ user }, "secretkey", (err, token) => {
 						res.send({
+							name: results[0].name,
 							isVerified: true,
 							loggedIn: true,
 							token,
